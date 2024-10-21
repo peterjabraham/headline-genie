@@ -28,6 +28,7 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 
 # Vercel
 .vercel
@@ -69,6 +70,7 @@ logs
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 
 # Next.js
 .next/
