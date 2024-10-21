@@ -9,15 +9,17 @@ interface AdInputProps {
     audience: string;
     goal: string;
     keywords: string;
+    additionalRules: string; // Add this line
   };
   onInputChange: (name: string, value: string) => void;
   onGenerateAds: () => void;
   onCsvUpload: (file: File) => void;
   isLoading: boolean;
   isFormValid: boolean;
+  csvFileName: string | null;
 }
 
-const AdInput: React.FC<AdInputProps> = ({ adData, onInputChange, onGenerateAds, onCsvUpload, isLoading, isFormValid }) => {
+const AdInput: React.FC<AdInputProps> = ({ adData, onInputChange, onGenerateAds, onCsvUpload, isLoading, isFormValid, csvFileName }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,19 +81,33 @@ const AdInput: React.FC<AdInputProps> = ({ adData, onInputChange, onGenerateAds,
         className="w-full p-2 border rounded"
       />
       <input
-        type="file"
-        accept=".csv"
-        ref={fileInputRef}
-        onChange={handleFileUpload}
-        style={{ display: 'none' }}
+        type="text"
+        placeholder="Additional rules and exclusions"
+        value={adData.additionalRules}
+        onChange={(e) => onInputChange('additionalRules', e.target.value)}
+        className="w-full p-2 border rounded"
       />
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        className="w-full p-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-        disabled={isLoading}
-      >
-        Upload .csv file
-      </button>
+      <div className="flex items-center space-x-2">
+        <input
+          type="file"
+          accept=".csv"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          style={{ display: 'none' }}
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="p-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+          disabled={isLoading}
+        >
+          Upload .csv file
+        </button>
+        {csvFileName && (
+          <span className="text-sm text-gray-600">
+            Uploaded: {csvFileName}
+          </span>
+        )}
+      </div>
       <button
         onClick={onGenerateAds}
         className={`w-full p-2 ${

@@ -11,6 +11,7 @@ interface FormData {
   audience: string;
   goal: string;
   keywords: string;
+  additionalRules: string;
 }
 
 interface AdData {
@@ -28,6 +29,7 @@ const AdMaker: React.FC = () => {
     audience: '',
     goal: '',
     keywords: '',
+    additionalRules: '',
   });
   const [adPreviews, setAdPreviews] = useState<AdData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +37,7 @@ const AdMaker: React.FC = () => {
   const [csvData, setCsvData] = useState<string>('');
   const [isFormValid, setIsFormValid] = useState(false);
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
+  const [csvError, setCsvError] = useState<string | null>(null);
 
   useEffect(() => {
     const isValid = Object.values(formData).some(value => value.trim() !== '') || csvData !== '';
@@ -45,11 +48,46 @@ const AdMaker: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const cleanCsvData = (data: string): string => {
+    // Remove any non-printable characters and unusual symbols
+    return data.replace(/[^\x20-\x7E\n]/g, '')
+      // Replace multiple spaces with a single space
+      .replace(/\s+/g, ' ')
+      // Trim whitespace from the beginning and end of each line
+      .split('\n')
+      .map(line => line.trim())
+      .join('\n')
+      // Remove empty lines
+      .replace(/^\s*[\r\n]/gm, '');
+  };
+
   const handleCsvUpload = (file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
-      setCsvData(event.target?.result as string);
-      setCsvFileName(file.name);
+      try {
+        const rawData = event.target?.result as string;
+        const cleanedData = cleanCsvData(rawData);
+        
+        // Check if the cleaned data is empty
+        if (cleanedData.trim() === '') {
+          throw new Error('The CSV file is empty or contains only invalid characters.');
+        }
+
+        setCsvData(cleanedData);
+        setCsvFileName(file.name);
+        setCsvError(null);
+      } catch (error) {
+        console.error('Error processing CSV:', error);
+        setCsvError(`Error processing CSV: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setCsvData('');
+        setCsvFileName(null);
+      }
+    };
+    reader.onerror = (error) => {
+      console.error('Error reading file:', error);
+      setCsvError(`Error reading file: ${error}`);
+      setCsvData('');
+      setCsvFileName(null);
     };
     reader.readAsText(file);
   };
@@ -142,8 +180,10 @@ const AdMaker: React.FC = () => {
               onCsvUpload={handleCsvUpload}
               isLoading={isLoading}
               isFormValid={isFormValid}
+              csvFileName={csvFileName}
             />
             {error && <p className="text-red-500 mt-2">{error}</p>}
+            {csvError && <p className="text-red-500 mt-2">{csvError}</p>}
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Ad Previews</h2>
