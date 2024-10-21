@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSession } from "next-auth/react"
 import AdInput from './AdInput';
+import LoginButton from './LoginButton';
 
 interface FormData {
   brandName: string;
@@ -27,6 +29,7 @@ interface LikedHeadline {
 }
 
 const AdMaker: React.FC = () => {
+  const { data: session } = useSession();
   const [formData, setFormData] = useState<FormData>({
     brandName: '',
     product: '',
@@ -223,11 +226,22 @@ const AdMaker: React.FC = () => {
     setUseLikedHeadlines(prev => !prev);
   }, []);
 
+  if (!session) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+        <h1 className="text-2xl font-bold mb-4">Welcome to Ad Maker</h1>
+        <p className="mb-4">Please sign in to use the application.</p>
+        <LoginButton />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">Headline Generator</h1>
+          <LoginButton />
         </div>
       </header>
       <main className="flex-grow bg-gray-100 p-4 overflow-auto">
