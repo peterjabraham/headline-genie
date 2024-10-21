@@ -240,10 +240,11 @@ const AdMaker: React.FC = () => {
             {csvError && <p className="text-red-500 mt-2">{csvError}</p>}
             <button
               onClick={() => setShowLikedHeadlines(!showLikedHeadlines)}
-              className="mt-4 p-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+              className="mt-4 p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
             >
               {showLikedHeadlines ? 'Hide Liked Headlines' : 'Show Liked Headlines'}
             </button>
+            <p className="text-xs text-gray-400 mt-1">You can use these liked headlines as a basis for style.</p>
             {showLikedHeadlines && (
               <div className="mt-4">
                 <h3 className="text-lg font-semibold">Liked Headlines</h3>
@@ -280,7 +281,7 @@ const AdMaker: React.FC = () => {
             {adPreviews.length > 0 && (
               <button
                 onClick={handleDownload}
-                className="mt-4 p-2 bg-green-500 text-white rounded hover:bg-green-600"
+                className="mt-4 p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
               >
                 Download Selected Headlines
               </button>
