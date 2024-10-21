@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AdInput from './AdInput';
 
 interface FormData {
@@ -46,6 +46,7 @@ const AdMaker: React.FC = () => {
   const [csvError, setCsvError] = useState<string | null>(null);
   const [likedHeadlines, setLikedHeadlines] = useState<LikedHeadline[]>([]);
   const [showLikedHeadlines, setShowLikedHeadlines] = useState(false);
+  const [useLikedHeadlines, setUseLikedHeadlines] = useState(false);
 
   useEffect(() => {
     const isValid = Object.values(formData).some(value => value.trim() !== '') || csvData !== '';
@@ -113,7 +114,12 @@ const AdMaker: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, csvData }),
+        body: JSON.stringify({ 
+          ...formData, 
+          csvData,
+          useLikedHeadlines,
+          likedHeadlines: useLikedHeadlines ? likedHeadlines : []
+        }),
       });
 
       if (!response.ok) {
@@ -213,6 +219,10 @@ const AdMaker: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const toggleUseLikedHeadlines = useCallback(() => {
+    setUseLikedHeadlines(prev => !prev);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-white shadow-sm">
@@ -238,13 +248,26 @@ const AdMaker: React.FC = () => {
             />
             {error && <p className="text-red-500 mt-2">{error}</p>}
             {csvError && <p className="text-red-500 mt-2">{csvError}</p>}
-            <button
-              onClick={() => setShowLikedHeadlines(!showLikedHeadlines)}
-              className="mt-4 p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
-            >
-              {showLikedHeadlines ? 'Hide Liked Headlines' : 'Show Liked Headlines'}
-            </button>
-            <p className="text-xs text-gray-400 mt-1">You can use these liked headlines as a basis for style.</p>
+            <div className="flex space-x-2 mt-4">
+              <button
+                onClick={() => setShowLikedHeadlines(!showLikedHeadlines)}
+                className="p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
+              >
+                {showLikedHeadlines ? 'Hide Liked Headlines' : 'Show Liked Headlines'}
+              </button>
+              <button
+                onClick={toggleUseLikedHeadlines}
+                className={`p-2 text-white rounded transition-colors duration-200 ${
+                  useLikedHeadlines ? 'bg-green-500' : 'bg-gray-500 hover:bg-green-500'
+                }`}
+              >
+                {useLikedHeadlines ? 'Using Liked Headlines' : 'Use Liked Headlines'}
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              You can use these liked headlines as a basis for style. 
+              {useLikedHeadlines && " (Currently being used as reference)"}
+            </p>
             {showLikedHeadlines && (
               <div className="mt-4">
                 <h3 className="text-lg font-semibold">Liked Headlines</h3>
