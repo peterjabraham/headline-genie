@@ -133,14 +133,20 @@ const AdMaker: React.FC = () => {
       return;
     }
 
-    let content = "Input Summary:\n";
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString();
+    const formattedTime = currentDate.toLocaleTimeString();
+
+    let content = `Generated on: ${formattedDate} at ${formattedTime}\n\n`;
+    content += "Input Summary:\n";
     Object.entries(formData).forEach(([key, value]) => {
-      if (value) {
-        content += `${key}: ${value}\n`;
-      }
+      const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      content += `${formattedKey}: ${value || 'Not provided'}\n`;
     });
     if (csvFileName) {
       content += `CSV file uploaded: ${csvFileName}\n`;
+    } else {
+      content += `CSV file: Not uploaded\n`;
     }
     content += "\nSelected Ads:\n\n";
 
@@ -152,7 +158,7 @@ const AdMaker: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'selected_headlines_with_summary.txt';
+    a.download = `selected_headlines_${formattedDate.replace(/\//g, '-')}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
