@@ -1,9 +1,21 @@
 import OpenAI from 'openai';
 import { NextApiRequest, NextApiResponse } from 'next';
+import fs from 'fs';
+import path from 'path';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+const dbPath = path.join(process.cwd(), 'liked-headlines.json');
+
+function getLikedHeadlines() {
+  if (!fs.existsSync(dbPath)) {
+    return [];
+  }
+  const data = fs.readFileSync(dbPath, 'utf-8');
+  return JSON.parse(data);
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,7 +36,12 @@ export default async function handler(
   }
 
   try {
-    const prompt = `Generate 5 ad headlines and primary text for the following:
+    const likedHeadlines = getLikedHeadlines();
+    const likedHeadlinesPrompt = likedHeadlines.length > 0
+      ? `Previously liked headlines for reference:\n${likedHeadlines.map(h => `- ${h.headline}`).join('\n')}\n\n`
+      : '';
+
+    const prompt = `${likedHeadlinesPrompt}Generate 5 ad headlines and primary text for the following:
     Brand: ${brandName}
     Product: ${product}
     User Benefit: ${userBenefit}

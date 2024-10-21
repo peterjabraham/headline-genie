@@ -20,6 +20,12 @@ interface AdData {
   liked: boolean;
 }
 
+interface LikedHeadline {
+  headline: string;
+  primaryText: string;
+  timestamp: string;
+}
+
 const AdMaker: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     brandName: '',
@@ -38,11 +44,17 @@ const AdMaker: React.FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [csvError, setCsvError] = useState<string | null>(null);
+  const [likedHeadlines, setLikedHeadlines] = useState<LikedHeadline[]>([]);
+  const [showLikedHeadlines, setShowLikedHeadlines] = useState(false);
 
   useEffect(() => {
     const isValid = Object.values(formData).some(value => value.trim() !== '') || csvData !== '';
     setIsFormValid(isValid);
   }, [formData, csvData]);
+
+  useEffect(() => {
+    fetchLikedHeadlines();
+  }, []);
 
   const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -118,11 +130,47 @@ const AdMaker: React.FC = () => {
     }
   };
 
-  const toggleLike = (index: number) => {
+  const fetchLikedHeadlines = async () => {
+    try {
+      const response = await fetch('/api/liked-headlines');
+      if (response.ok) {
+        const data = await response.json();
+        setLikedHeadlines(data);
+      }
+    } catch (error) {
+      console.error('Error fetching liked headlines:', error);
+    }
+  };
+
+  const saveLikedHeadline = async (headline: string, primaryText: string) => {
+    try {
+      const response = await fetch('/api/liked-headlines', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ headline, primaryText }),
+      });
+      if (response.ok) {
+        fetchLikedHeadlines();
+      }
+    } catch (error) {
+      console.error('Error saving liked headline:', error);
+    }
+  };
+
+  const toggleLike = async (index: number) => {
     setAdPreviews(prevAds => 
-      prevAds.map((ad, i) => 
-        i === index ? { ...ad, liked: !ad.liked } : ad
-      )
+      prevAds.map((ad, i) => {
+        if (i === index) {
+          const newLikedState = !ad.liked;
+          if (newLikedState) {
+            saveLikedHeadline(ad.headline, ad.primaryText);
+          }
+          return { ...ad, liked: newLikedState };
+        }
+        return ad;
+      })
     );
   };
 
@@ -190,6 +238,26 @@ const AdMaker: React.FC = () => {
             />
             {error && <p className="text-red-500 mt-2">{error}</p>}
             {csvError && <p className="text-red-500 mt-2">{csvError}</p>}
+            <button
+              onClick={() => setShowLikedHeadlines(!showLikedHeadlines)}
+              className="mt-4 p-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+            >
+              {showLikedHeadlines ? 'Hide Liked Headlines' : 'Show Liked Headlines'}
+            </button>
+            {showLikedHeadlines && (
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold">Liked Headlines</h3>
+                <ul className="list-disc pl-5">
+                  {likedHeadlines.map((headline, index) => (
+                    <li key={index} className="mt-2">
+                      <p><strong>Headline:</strong> {headline.headline}</p>
+                      <p><strong>Primary Text:</strong> {headline.primaryText}</p>
+                      <p><small>Liked on: {new Date(headline.timestamp).toLocaleString()}</small></p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Ad Previews</h2>
