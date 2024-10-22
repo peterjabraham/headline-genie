@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSession } from "next-auth/react"
 import AdInput from './AdInput';
-import LoginButton from './LoginButton';
 
 interface FormData {
   brandName: string;
@@ -29,7 +27,6 @@ interface LikedHeadline {
 }
 
 const AdMaker: React.FC = () => {
-  const { data: session } = useSession();
   const [formData, setFormData] = useState<FormData>({
     brandName: '',
     product: '',
@@ -226,33 +223,17 @@ const AdMaker: React.FC = () => {
     setUseLikedHeadlines(prev => !prev);
   }, []);
 
-  if (!session) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <h1 className="text-2xl font-bold mb-2">Welcome to The Ad Headline Lab</h1>
-        <p className="text-lg mb-4">Creative headlines that deliver results!</p>
-        <p className="mb-4">Please sign in to use the application.</p>
-        <LoginButton />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">The Ad Headline Lab</h1>
-            <p className="text-sm text-gray-600">Creative headlines that deliver results!</p>
-          </div>
-          <LoginButton />
+          <h1 className="text-2xl font-bold text-gray-900">Headline Generator</h1>
         </div>
       </header>
       <main className="flex-grow bg-gray-100 p-4 overflow-auto">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h1 className="text-2xl font-bold mb-2">Welcome to The Ad Headline Lab</h1>
-            <p className="text-lg mb-4">Creative headlines that deliver results!</p>
+            <h2 className="text-xl font-semibold mb-2">Ad Brief</h2>
             <p className="text-sm text-gray-600 mb-4">
               The more info you give me the better your headlines will be, and upload a .csv of high performing examples in one column file please.
             </p>

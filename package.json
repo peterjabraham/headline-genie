@@ -1,5 +1,5 @@
 {
-  "name": "ad-headline-lab",
+  "name": "ad-maker",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,8 +12,7 @@
     "next": "^13.5.7",
     "openai": "^4.0.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "next-auth": "^4.24.5"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

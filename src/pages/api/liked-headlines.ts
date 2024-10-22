@@ -1,8 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "./auth/[...nextauth]"
 
 const dbPath = path.join(process.cwd(), 'liked-headlines.json');
 
@@ -24,13 +22,7 @@ function saveLikedHeadlines(headlines: LikedHeadline[]) {
   fs.writeFileSync(dbPath, JSON.stringify(headlines, null, 2));
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions)
-
-  if (!session) {
-    return res.status(401).json({ message: "You must be logged in." })
-  }
-
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     const likedHeadlines = getLikedHeadlines();
     res.status(200).json(likedHeadlines);

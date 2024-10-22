@@ -1,12 +1,5 @@
 import React from 'react'
 import './globals.css'
-import { Providers } from './Providers'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'The Ad Headline Lab',
-  description: 'Creative headlines that deliver results!',
-}
 
 export default function RootLayout({
   children,
@@ -15,9 +8,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Providers>
-        <body>{children}</body>
-      </Providers>
+      <body>{children}</body>
     </html>
   )
 }
