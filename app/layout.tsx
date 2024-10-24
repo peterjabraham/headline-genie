@@ -1,5 +1,7 @@
 import ClientProvider from "./components/ClientProvider";
+import Navbar from "./components/Navbar";
 import { Suspense } from "react";
+import './globals.css';  // Add this import
 
 export default function RootLayout({
   children,
@@ -15,6 +17,7 @@ export default function RootLayout({
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
           }>
+            <Navbar />
             {children}
           </Suspense>
         </ClientProvider>

@@ -224,94 +224,87 @@ const AdMaker: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Headline Generator</h1>
-        </div>
-      </header>
-      <main className="flex-grow bg-gray-100 p-4 overflow-auto">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-xl font-semibold mb-2">Ad Brief</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              The more info you give me the better your headlines will be, and upload a .csv of high performing examples in one column file please.
-            </p>
-            <AdInput
-              adData={formData}
-              onInputChange={handleInputChange}
-              onGenerateAds={handleWriteAds}
-              onCsvUpload={handleCsvUpload}
-              isLoading={isLoading}
-              isFormValid={isFormValid}
-              csvFileName={csvFileName}
-            />
-            {error && <p className="text-red-500 mt-2">{error}</p>}
-            {csvError && <p className="text-red-500 mt-2">{csvError}</p>}
-            <div className="flex space-x-2 mt-4">
-              <button
-                onClick={() => setShowLikedHeadlines(!showLikedHeadlines)}
-                className="p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
-              >
-                {showLikedHeadlines ? 'Hide Liked Headlines' : 'Show Liked Headlines'}
-              </button>
-              <button
-                onClick={toggleUseLikedHeadlines}
-                className={`p-2 text-white rounded transition-colors duration-200 ${
-                  useLikedHeadlines ? 'bg-green-500' : 'bg-gray-500 hover:bg-green-500'
-                }`}
-              >
-                {useLikedHeadlines ? 'Using Liked Headlines' : 'Use Liked Headlines'}
-              </button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 className="text-xl font-semibold mb-2">Ad Brief</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            The more info you give me the better your headlines will be, and upload a .csv of high performing examples in one column file please.
+          </p>
+          <AdInput
+            adData={formData}
+            onInputChange={handleInputChange}
+            onGenerateAds={handleWriteAds}
+            onCsvUpload={handleCsvUpload}
+            isLoading={isLoading}
+            isFormValid={isFormValid}
+            csvFileName={csvFileName}
+          />
+          {error && <p className="text-red-500 mt-2">{error}</p>}
+          {csvError && <p className="text-red-500 mt-2">{csvError}</p>}
+          <div className="flex space-x-2 mt-4">
+            <button
+              onClick={() => setShowLikedHeadlines(!showLikedHeadlines)}
+              className="p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
+            >
+              {showLikedHeadlines ? 'Hide Liked Headlines' : 'Show Liked Headlines'}
+            </button>
+            <button
+              onClick={toggleUseLikedHeadlines}
+              className={`p-2 text-white rounded transition-colors duration-200 ${
+                useLikedHeadlines ? 'bg-green-500' : 'bg-gray-500 hover:bg-green-500'
+              }`}
+            >
+              {useLikedHeadlines ? 'Using Liked Headlines' : 'Use Liked Headlines'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 mt-1">
+            You can use these liked headlines as a basis for style. 
+            {useLikedHeadlines && " (Currently being used as reference)"}
+          </p>
+          {showLikedHeadlines && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold">Liked Headlines</h3>
+              <ul className="list-disc pl-5">
+                {likedHeadlines.map((headline, index) => (
+                  <li key={index} className="mt-2">
+                    <p><strong>Headline:</strong> {headline.headline}</p>
+                    <p><strong>Primary Text:</strong> {headline.primaryText}</p>
+                    <p><small>Liked on: {new Date(headline.timestamp).toLocaleString()}</small></p>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <p className="text-xs text-gray-400 mt-1">
-              You can use these liked headlines as a basis for style. 
-              {useLikedHeadlines && " (Currently being used as reference)"}
-            </p>
-            {showLikedHeadlines && (
-              <div className="mt-4">
-                <h3 className="text-lg font-semibold">Liked Headlines</h3>
-                <ul className="list-disc pl-5">
-                  {likedHeadlines.map((headline, index) => (
-                    <li key={index} className="mt-2">
-                      <p><strong>Headline:</strong> {headline.headline}</p>
-                      <p><strong>Primary Text:</strong> {headline.primaryText}</p>
-                      <p><small>Liked on: {new Date(headline.timestamp).toLocaleString()}</small></p>
-                    </li>
-                  ))}
-                </ul>
+          )}
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Ad Previews</h2>
+          <p>Number of previews: {adPreviews.length}</p>
+          <div className="space-y-4">
+            {adPreviews.map((ad, index) => (
+              <div key={index} className="border p-4 rounded relative">
+                <button
+                  onClick={() => toggleLike(index)}
+                  className="absolute top-2 right-2 text-2xl"
+                >
+                  {ad.liked ? '❤️' : '🤍'}
+                </button>
+                <h3 className="font-semibold">Ad {index + 1}</h3>
+                <p><strong>Headline:</strong> {ad.headline}</p>
+                <p><strong>Primary Text:</strong> {ad.primaryText}</p>
               </div>
-            )}
+            ))}
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">Ad Previews</h2>
-            <p>Number of previews: {adPreviews.length}</p>
-            <div className="space-y-4">
-              {adPreviews.map((ad, index) => (
-                <div key={index} className="border p-4 rounded relative">
-                  <button
-                    onClick={() => toggleLike(index)}
-                    className="absolute top-2 right-2 text-2xl"
-                  >
-                    {ad.liked ? '❤️' : '🤍'}
-                  </button>
-                  <h3 className="font-semibold">Ad {index + 1}</h3>
-                  <p><strong>Headline:</strong> {ad.headline}</p>
-                  <p><strong>Primary Text:</strong> {ad.primaryText}</p>
-                </div>
-              ))}
-            </div>
-            {adPreviews.length > 0 && (
-              <button
-                onClick={handleDownload}
-                className="mt-4 p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
-              >
-                Download Selected Headlines
-              </button>
-            )}
-          </div>
+          {adPreviews.length > 0 && (
+            <button
+              onClick={handleDownload}
+              className="mt-4 p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
+            >
+              Download Selected Headlines
+            </button>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
 };
