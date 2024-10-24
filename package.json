@@ -1,5 +1,5 @@
 {
-  "name": "ad-maker",
+  "name": "headline-genie",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@next-auth/firebase-adapter": "^2.0.1",
+    "firebase": "^10.7.0",
+    "firebase-admin": "^11.11.0",
     "next": "^13.5.7",
+    "next-auth": "^4.24.5",
     "openai": "^4.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

@@ -1,0 +1,8 @@
+{
+  "explorer.excludeGitIgnore": false,
+  "files.exclude": {
+    "**/node_modules": false,
+    "**/.git": false
+    // Add any other directories you want to include
+  }
+}
