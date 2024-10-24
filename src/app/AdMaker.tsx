@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import AdInput from './AdInput';
+import { useSession } from 'next-auth/react';
 
 interface FormData {
   brandName: string;
@@ -24,6 +25,8 @@ interface LikedHeadline {
   headline: string;
   primaryText: string;
   timestamp: string;
+  userId: string;
+  userEmail?: string;  // Optional, for displaying who liked it
 }
 
 const AdMaker: React.FC = () => {
@@ -47,6 +50,9 @@ const AdMaker: React.FC = () => {
   const [likedHeadlines, setLikedHeadlines] = useState<LikedHeadline[]>([]);
   const [showLikedHeadlines, setShowLikedHeadlines] = useState(false);
   const [useLikedHeadlines, setUseLikedHeadlines] = useState(false);
+  const [showAllLikedHeadlines, setShowAllLikedHeadlines] = useState(false);
+  const [allLikedHeadlines, setAllLikedHeadlines] = useState<LikedHeadline[]>([]);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const isValid = Object.values(formData).some(value => value.trim() !== '') || csvData !== '';
@@ -149,19 +155,39 @@ const AdMaker: React.FC = () => {
   };
 
   const saveLikedHeadline = async (headline: string, primaryText: string) => {
+    if (!session?.user?.email) return;
+
     try {
       const response = await fetch('/api/liked-headlines', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ headline, primaryText }),
+        body: JSON.stringify({ 
+          headline, 
+          primaryText,
+          userId: session.user.email, // Using email as userId for simplicity
+          userEmail: session.user.email
+        }),
       });
       if (response.ok) {
         fetchLikedHeadlines();
+        fetchAllLikedHeadlines();
       }
     } catch (error) {
       console.error('Error saving liked headline:', error);
+    }
+  };
+
+  const fetchAllLikedHeadlines = async () => {
+    try {
+      const response = await fetch('/api/all-liked-headlines');
+      if (response.ok) {
+        const data = await response.json();
+        setAllLikedHeadlines(data);
+      }
+    } catch (error) {
+      console.error('Error fetching all liked headlines:', error);
     }
   };
 
@@ -247,7 +273,13 @@ const AdMaker: React.FC = () => {
               onClick={() => setShowLikedHeadlines(!showLikedHeadlines)}
               className="p-2 bg-gray-500 text-white rounded hover:bg-green-500 transition-colors duration-200"
             >
-              {showLikedHeadlines ? 'Hide Liked Headlines' : 'Show Liked Headlines'}
+              {showLikedHeadlines ? 'Hide My Headlines' : 'Show My Headlines'}
+            </button>
+            <button
+              onClick={() => setShowAllLikedHeadlines(!showAllLikedHeadlines)}
+              className="p-2 bg-gray-500 text-white rounded hover:bg-purple-500 transition-colors duration-200"
+            >
+              {showAllLikedHeadlines ? 'Hide All Headlines' : 'Show All Headlines'}
             </button>
             <button
               onClick={toggleUseLikedHeadlines}
@@ -262,18 +294,41 @@ const AdMaker: React.FC = () => {
             You can use these liked headlines as a basis for style. 
             {useLikedHeadlines && " (Currently being used as reference)"}
           </p>
-          {showLikedHeadlines && (
+          {(showLikedHeadlines || showAllLikedHeadlines) && (
             <div className="mt-4">
-              <h3 className="text-lg font-semibold">Liked Headlines</h3>
-              <ul className="list-disc pl-5">
-                {likedHeadlines.map((headline, index) => (
-                  <li key={index} className="mt-2">
-                    <p><strong>Headline:</strong> {headline.headline}</p>
-                    <p><strong>Primary Text:</strong> {headline.primaryText}</p>
-                    <p><small>Liked on: {new Date(headline.timestamp).toLocaleString()}</small></p>
-                  </li>
-                ))}
-              </ul>
+              {showLikedHeadlines && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold">My Liked Headlines</h3>
+                  <ul className="list-disc pl-5">
+                    {likedHeadlines.map((headline, index) => (
+                      <li key={`my-${index}`} className="mt-2">
+                        <p><strong>Headline:</strong> {headline.headline}</p>
+                        <p><strong>Primary Text:</strong> {headline.primaryText}</p>
+                        <p><small>Liked on: {new Date(headline.timestamp).toLocaleString()}</small></p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {showAllLikedHeadlines && (
+                <div>
+                  <h3 className="text-lg font-semibold">All Users' Liked Headlines</h3>
+                  <ul className="list-disc pl-5">
+                    {allLikedHeadlines.map((headline, index) => (
+                      <li key={`all-${index}`} className="mt-2">
+                        <p><strong>Headline:</strong> {headline.headline}</p>
+                        <p><strong>Primary Text:</strong> {headline.primaryText}</p>
+                        <p>
+                          <small>
+                            Liked by: {headline.userEmail} on {new Date(headline.timestamp).toLocaleString()}
+                          </small>
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
