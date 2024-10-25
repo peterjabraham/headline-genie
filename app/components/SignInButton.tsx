@@ -9,9 +9,9 @@ export default function SignInButton() {
 
   const handleSignIn = async () => {
     setLoading(true);
-    await signIn("google", { 
-      callbackUrl: window.location.origin,
-      redirect: true 
+    await signIn("google", {
+      callbackUrl: `${window.location.origin}`,
+      redirect: true,
     });
   };
 
